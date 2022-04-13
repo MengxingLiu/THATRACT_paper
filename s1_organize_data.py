@@ -21,7 +21,7 @@ tractparams = pd.read_csv(raw_csv / "tractparams_THATRACT.csv")
 tract_dic = dict(zip(tractparams["slabel"], tractparams["roi2"]))
 tract_dic = {k:v for k, v in tract_dic.items() if "KN" in k}
 ## load pairwise_TRT
-pairwise_TRT = pd.read_csv(raw_csv / "pairwise_agreement.csv")
+pairwise_TRT = pd.read_csv(raw_csv / "pairwise_agreement_THATRACT_TRT.csv")
 pairwise_TRT["btw"] = "T01vsT02"
 # pairwise_TRT["analysis"] = "01"
 
@@ -36,9 +36,15 @@ pairwise["density_correlation"] = pairwise["density_correlation"].astype(float)
 pairwise = pairwise.replace({"TCK":tractDic})
 pairwise.to_csv(git_dir / "pairwise_all.csv", index=False)
 
-pairwise = pd.read_csv(git_dir / "pairwise.csv")
+pairwise = pd.read_csv(git_dir / "pairwise_all.csv")
 pairwise = pairwise[["bundle_adjacency_voxels", "dice_voxels", 
                 'density_correlation', 'TCK', 'SUBID', 'btw']]
+pairwise[pairwise["btw"]=="T01vsT02"].groupby(["TCK"]).describe(
+                ).to_csv("pairwise_agreement_TRT_description_new.csv")
+pairwise[~(pairwise["btw"]=="T01vsT02")].groupby(["TCK"]).describe(
+                ).to_csv("pairwise_agreement_compute_description_new.csv")
+
+
 
 """ calculate results for compute vs recompute
 tractDic = {"LKN27":"L_OR_05", "LKN28":"R_OR_05", "LKN29":"L_OR_1", "LKN30":"R_OR_1",
@@ -180,11 +186,17 @@ pairwise.groupby("tract").describe().to_csv("pairwise_agreement_description.csv"
 
 correlation_TRT = pd.read_csv( raw_csv / "correlation_fa.csv")
 correlation_compute = pd.read_csv(raw_csv / "correlation_fa_compute.csv")
+correlation_compute["btw"]=correlation_compute["btw"]+"compute"
 correlation = pd.concat([correlation_TRT, correlation_compute])
 correlation = correlation.rename(columns={"subID":"SUBID"})
 correlation = correlation.replace({"TCK":{"L_MT_S1":"L_MR_S1", "L_MT_M1":"L_MR_M1",
                             "R_MT_S1":"R_MR_S1","R_MT_M1":"R_MR_M1"}})
 correlation.to_csv(raw_csv / "correlation_fa_TRT_compute.csv", index=False)
+
+correlation[correlation["btw"]=="T01vsT02"].groupby(["TCK"]).describe(
+                ).to_csv("correlation_TRT_description_new.csv")
+correlation[~(correlation["btw"]=="T01vsT02")].groupby(["TCK"]).describe(
+                ).to_csv("correlation_compute_description_new.csv")
 
 
 profile = pd.read_csv( raw_csv / "RTP_Profile_compute.csv")
@@ -192,6 +204,7 @@ profile["TCK"] = profile.TCK.map(lambda x : "L"+x if "KN" in x else x)
 profile = profile.replace({"TCK":tractDic})
 profile = profile.rename(columns={"subID":"SUBID"})
 profile.to_csv(raw_csv / "RTP_Profile_compute_newlabel.csv", index=False)
+
 
 pairwise = pairwise.pivot(index=["SUBID", "TCK"], columns = "btw")
 pairwise.columns = ["_".join(i) for i in pairwise.columns.to_flat_index()]

@@ -26,7 +26,7 @@ fig_dir = Path(f"{git_dir}/fig_dir")
 # plot Fig. 2 
 profile = pd.read_csv( raw_csv / "RTP_Profile_compute_newlabel.csv")
 correlation = pd.read_csv( raw_csv / "correlation_fa_TRT_compute.csv")
-pairwise = pd.read_csv( raw_csv / "pairwise_agreement.csv")
+pairwise = pd.read_csv( raw_csv / "pairwise_all.csv")
 
 tck_to_plot = ["L_OR_05", "R_OR_05", "L_AR_A1-4", "R_AR_A1-4", 
                "L_MR_M1", "R_MR_M1", "L_MR_S1", "R_MR_S1","L_DT-4", "R_DT-4"]
@@ -37,16 +37,20 @@ def plot_fig(btw, profile=profile, correlation=correlation,
     profile = profile[profile["TCK"].isin(tck_to_plot)]
     correlation = correlation[correlation["TCK"].isin(tck_to_plot)]
     pairwise = pairwise[pairwise["TCK"].isin(tck_to_plot)]
-
+    size=3
     if btw == "compute":
         tmp = profile[(profile["analysis"].isin([1,2])) & (profile["TCK"]=='L_MR_M1') &
               (profile["ses"]=="T01")]
         tmp["analysis"] = tmp["analysis"].map(lambda x : f"compute_0{str(x)}")
+        hue_pro = "analysis"
         correlation = correlation[  ~(correlation["btw"]=="T01vsT02")]
         pairwise = pairwise[  ~(pairwise["btw"]=="T01vsT02")]
+
     elif btw == "test-retest":
         tmp = profile[(profile["TCK"]=='L_MR_M1')]
         tmp = tmp[tmp["SUBID"].isin(tmp[tmp["ses"]=="T02"].SUBID.unique())]
+        tmp = tmp[tmp["analysis"]==1]
+        hue_pro = "ses"
         correlation = correlation[  (correlation["btw"]=="T01vsT02")]
         pairwise = pairwise[  (pairwise["btw"]=="T01vsT02")]
     sns.set_style("darkgrid")
@@ -57,35 +61,33 @@ def plot_fig(btw, profile=profile, correlation=correlation,
     order = tck_to_plot
     # FA profile 
 
-    tmp = profile[(profile["analysis"].isin([1,2])) & (profile["TCK"]=='L_MR_M1') &
-                (profile["ses"]=="T01")]
-    tmp["analysis"] = tmp["analysis"].map(lambda x : f"compute_0{str(x)}")
-    f2_ax1 = sns.lineplot(data=tmp, x="ind", y="fa", hue="analysis",
-                    ci="sd", style = "analysis", palette = ["Grey", "Green"] )
+
+    f2_ax1 = sns.lineplot(data=tmp, x="ind", y="fa", hue=hue_pro,
+                    ci="sd", style = hue_pro, palette = ["Grey", "Green"] )
     f2_ax1.set_title('gs[0, :]')
     f2_ax2 = fig2.add_subplot(gs[3:6, 0])
 
     # FA correlation dist
     f2_ax2 = sns.stripplot(x="TCK", y = "corr", data = correlation,
-                        order = order, palette = palette, rasterized=True)
+                        order = order, palette = palette, rasterized=True, size=size)
     f2_ax2.set(xlabel="fiber group label")
 
     f2_ax3 = fig2.add_subplot(gs[0:2, 1])
     f2_ax3 = sns.stripplot(x="TCK", y = "bundle_adjacency_voxels", data = pairwise,
                         order= order, palette = palette,
-                        rasterized=True)
+                        rasterized=True, size=size)
     f2_ax3.set(xticklabels=[])
     f2_ax3.set(xlabel=None)
 
     f2_ax4 = fig2.add_subplot(gs[2:4, 1])
     f2_ax4 = sns.stripplot(x="TCK", y = "dice_voxels", data = pairwise,
-                        order = order, palette = palette, rasterized=True)
+                        order = order, palette = palette, rasterized=True, size=size)
     f2_ax4.set(xticklabels=[])
     f2_ax4.set(xlabel=None)
 
     f2_ax5 = fig2.add_subplot(gs[4:6, 1])
     f2_ax5 = sns.stripplot(x="TCK", y = "density_correlation", data = pairwise,
-                        order = order, palette = palette, rasterized=True)
+                        order = order, palette = palette, rasterized=True, size=size)
     f2_ax5.set(xlabel="fiber group label")
     return fig2 
 
