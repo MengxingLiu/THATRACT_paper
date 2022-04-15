@@ -37,6 +37,10 @@ def plot_fig(btw, profile=profile, correlation=correlation,
     profile = profile[profile["TCK"].isin(tck_to_plot)]
     correlation = correlation[correlation["TCK"].isin(tck_to_plot)]
     pairwise = pairwise[pairwise["TCK"].isin(tck_to_plot)]
+    # add two columns to separate fiber group and hemi
+    profile[["hemi","group"]] = profile["TCK"].str.split("_",1, expand=True)
+    correlation[["hemi","group"]] = correlation["TCK"].str.split("_",1, expand=True)
+    pairwise[["hemi","group"]] = pairwise["TCK"].str.split("_",1, expand=True)
     size=3
     if btw == "compute":
         tmp = profile[(profile["analysis"].isin([1,2])) & (profile["TCK"]=='L_MR_M1') &
@@ -58,10 +62,20 @@ def plot_fig(btw, profile=profile, correlation=correlation,
     gs = fig2.add_gridspec(6, 2)
     f2_ax1 = fig2.add_subplot(gs[0:3, 0])
     palette = sns.color_palette("Paired")
-    order = tck_to_plot
+    new_palette = palette.copy()
+    order = tck_to_plot.copy()
+    i = 2
+    
+    while i < len(order):
+        # add space between bundle groups
+        order.insert(i, "")
+        order.insert(i+1, "")
+        new_palette.insert(i, palette[0]);new_palette.insert(i, palette[0])
+        i += (3+1)
+
     # FA profile 
-
-
+    print(order)
+    dodge = 0.2
     f2_ax1 = sns.lineplot(data=tmp, x="ind", y="fa", hue=hue_pro,
                     ci="sd", style = hue_pro, palette = ["Grey", "Green"] )
     f2_ax1.set_title('gs[0, :]')
@@ -69,25 +83,28 @@ def plot_fig(btw, profile=profile, correlation=correlation,
 
     # FA correlation dist
     f2_ax2 = sns.stripplot(x="TCK", y = "corr", data = correlation,
-                        order = order, palette = palette, rasterized=True, size=size)
+                        order = order, palette = new_palette,
+                        rasterized=True, size=size)
     f2_ax2.set(xlabel="fiber group label")
 
     f2_ax3 = fig2.add_subplot(gs[0:2, 1])
     f2_ax3 = sns.stripplot(x="TCK", y = "bundle_adjacency_voxels", data = pairwise,
-                        order= order, palette = palette,
+                        order= order, palette = new_palette,
                         rasterized=True, size=size)
     f2_ax3.set(xticklabels=[])
     f2_ax3.set(xlabel=None)
 
     f2_ax4 = fig2.add_subplot(gs[2:4, 1])
     f2_ax4 = sns.stripplot(x="TCK", y = "dice_voxels", data = pairwise,
-                        order = order, palette = palette, rasterized=True, size=size)
+                        order = order, palette = new_palette, 
+                        rasterized=True, size=size)
     f2_ax4.set(xticklabels=[])
     f2_ax4.set(xlabel=None)
 
     f2_ax5 = fig2.add_subplot(gs[4:6, 1])
     f2_ax5 = sns.stripplot(x="TCK", y = "density_correlation", data = pairwise,
-                        order = order, palette = palette, rasterized=True, size=size)
+                        order = order,  palette = new_palette, 
+                        rasterized=True, size=size)
     f2_ax5.set(xlabel="fiber group label")
     return fig2 
 
