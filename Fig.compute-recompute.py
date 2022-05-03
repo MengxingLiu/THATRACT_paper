@@ -12,6 +12,7 @@ import scipy,random, matplotlib, itertools, glob, os, platform, getpass
 import numpy as np
 import matplotlib.gridspec as gridspec
 from pathlib import Path
+import matplotlib.ticker as ticker
 
 if getpass.getuser() == "mengxing":
     git_dir = Path("/home/mengxing/GIT/THATRACT_paper")
@@ -29,7 +30,7 @@ correlation = pd.read_csv( raw_csv / "correlation_fa_TRT_compute.csv")
 pairwise = pd.read_csv( raw_csv / "pairwise_all.csv")
 
 tck_to_plot = ["L_OR_05", "R_OR_05", "L_AR_A1-4", "R_AR_A1-4", 
-               "L_MR_M1", "R_MR_M1", "L_MR_S1", "R_MR_S1","L_DT-4", "R_DT-4"]
+               "L_MR_M1", "R_MR_M1", "L_DT", "R_DT", "L_SR", "R_SR"]
 
 def plot_fig(btw, profile=profile, correlation=correlation, 
                 pairwise=pairwise, tck_to_plot=tck_to_plot):
@@ -93,6 +94,7 @@ def plot_fig(btw, profile=profile, correlation=correlation,
                         rasterized=True, size=size)
     f2_ax3.set(xticklabels=[])
     f2_ax3.set(xlabel=None)
+    if btw=="compute": f2_ax3.set_yticks([0,0.5,1.0,1.5])
 
     f2_ax4 = fig2.add_subplot(gs[2:4, 1])
     f2_ax4 = sns.stripplot(x="TCK", y = "dice_voxels", data = pairwise,
@@ -118,71 +120,3 @@ fig3 = plot_fig("test-retest", profile, correlation, pairwise, tck_to_plot)
 fig3.set_size_inches(9.88,5.93)
 fig3.savefig( fig_dir / "Fig3_test-retest_new.svg", dpi=300, bbox_inches='tight')
 
-"""
-
- # plot Fig.3 
-csv_dir = r"F:\TESTDATA\GIT\THATRACT_paper\csv"
-profile = pd.read_csv(f"{csv_dir}\RTP_Profile.csv")
-correlation = pd.read_csv(f"{csv_dir}\correlation_fa.csv")
-pairwise = pd.read_csv(f"{csv_dir}\pairwise_agreement.csv")
-
-# change tck labels
-profile["TCK"] = profile.TCK.map(lambda x : "L"+x)
-profile = profile.replace({"TCK":tractDic} )
-pairwise = pairwise.replace({"tract":tractDic} )
-
-tck_to_plot = ["L_OR_05", "R_OR_05", "L_AR_A1-4", "R_AR_A1-4", 
-               "L_MR_M1", "R_MR_M1", "L_DT-4", "R_DT-4"]
-profile = profile[profile["TCK"].isin(tck_to_plot)]
-
-
-profile = profile[profile["subID"].isin(profile[profile["ses"]=="T02"].subID.unique())]
-correlation = correlation.replace({"TCK":{"L_MT_M1":"L_MR_M1","R_MT_M1":"R_MR_M1"}})
-correlation = correlation[correlation["TCK"].isin(tck_to_plot)]
-correlation["TCK"] = correlation["TCK"].map(lambda x : x[0:4])
-                                                 
-pairwise = pairwise[pairwise["tract"].isin(tck_to_plot)]
-pairwise["tract"] = pairwise["tract"].map(lambda x : x[0:4])
-
-pairwise["bundle_adjacency_voxels"] = pairwise["bundle_adjacency_voxels"].astype(float)
-pairwise["dice_voxels"] = pairwise["dice_voxels"].astype(float)
-pairwise["density_correlation"] = pairwise["density_correlation"].astype(float)
-
-fig3 = plt.figure(constrained_layout=True)
-gs = fig3.add_gridspec(6, 2)
-f3_ax1 = fig3.add_subplot(gs[0:3, 0])
-
-# FA profile 
-#tmp = profile[(profile["TCK"]=='L_MR_M1') & (profile["subID"]=="S038")]
-tmp = profile[(profile["TCK"]=='L_MR_M1')]
-tmp = tmp[tmp["subID"].isin(tmp[tmp["ses"]=="T02"].subID.unique())]
-f3_ax1 = sns.lineplot(data=tmp, x="ind", y="fa", hue="ses",
-                   style="ses", ci="sd", palette = ["Grey", "Green"] )
-# FA correlation dist
-f3_ax2 = fig3.add_subplot(gs[3:6, 0])
-f3_ax2 = sns.stripplot(x="TCK", y = "corr", data = correlation,
-                       order = order, palette = palette, rasterized=True)
-f3_ax2.set(xlabel="fiber group label")
-
-f3_ax3 = fig3.add_subplot(gs[0:2, 1])
-
-f3_ax3 = sns.stripplot(x="tract", y = "bundle_adjacency_voxels",
-                       data = pairwise, order = order, palette = palette,
-                       rasterized=True)
-f3_ax3.set(xticklabels=[])
-f3_ax3.set(xlabel=None)
-
-f3_ax4 = fig3.add_subplot(gs[2:4, 1])
-f3_ax4 = sns.stripplot(x="tract", y = "dice_voxels", data = pairwise, 
-                       order = order, palette = palette, rasterized=True)
-f3_ax4.set(xticklabels=[])
-f3_ax4.set(xlabel=None)
-
-f3_ax5 = fig3.add_subplot(gs[4:6, 1])
-f3_ax5 = sns.stripplot(x="tract", y = "density_correlation", data = pairwise,
-                       order = order, palette = palette, rasterized=True)
-f3_ax5.set(xlabel="fiber group label")
-
-fig3.set_size_inches(9.88,4.93)
-fig3.savefig(f"{fig_dir}\Fig3_test-retest_new.svg", dpi=300, format = "svg", bbox_inches='tight')
-"""

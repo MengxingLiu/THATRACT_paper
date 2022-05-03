@@ -6,14 +6,22 @@ Created on Fri Feb 12 14:05:49 2021
 """
 import pandas as pd
 import seaborn as sns
-import itertools
-import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
-import scipy
+import scipy,random, matplotlib, itertools, glob, os, platform, getpass
 import numpy as np
-import random
 import matplotlib.gridspec as gridspec
+from pathlib import Path
+
+if getpass.getuser() == "mengxing":
+    git_dir = Path("/home/mengxing/GIT/THATRACT_paper")
+elif getpass.getuser() == "lmengxing":
+    if platform.system() == "Linux":
+        git_dir = Path("/bcbl/home/home_g-m/lmengxing/TESTDATA/GIT/THATRACT_paper")
+    elif platform.system() == "Windows":
+        git_dir = Path("F:\TESTDATA\GIT\THATRACT_paper")
+raw_csv = Path(f"{git_dir}/raw_csv")
+fig_dir = Path(f"{git_dir}/fig_dir")
 
 """ calculate results for compute vs recompute
 tractDic = {"KN27":"L_OR_05", "KN28":"R_OR_05", "KN29":"L_OR_1", "KN30":"R_OR_1",
@@ -154,58 +162,51 @@ correlation.groupby("TCK").describe().to_csv("correlation_description.csv")
 pairwise.groupby("tract").describe().to_csv("pairwise_agreement_description.csv")
            
 """
-order = ["L_OR","R_OR","L_AR", "R_AR", "L_MR", "R_MR", "L_DT", "R_DT"]
- # plot Fig. 2 
-csv_dir = "F:\TESTDATA\GIT\THATRACT_paper\csv"
-# profile = pd.read_csv(f"{csv_dir}\RTP_Profile_compute.csv")
-correlation = pd.read_csv(f"{csv_dir}\correlation_all_indices_compute.csv")
-# pairwise = pd.read_csv(f"{csv_dir}\pairwise_agreement_compute.csv")
-
-# change tck labels
-
 
 tck_to_plot = ["L_OR_05", "R_OR_05", "L_AR_A1-4", "R_AR_A1-4", 
-               "L_MR_M1", "R_MR_M1", "L_DT-4", "R_DT-4"]
+               "L_MR_M1", "R_MR_M1", "L_DT", "R_DT", 
+                "L_MR_S1", "R_MR_S1"]
 
-# inds = ['ad', 'cl', 'md', 'volume', 'curvature',
-#        'rd']
+ # plot Fig. 2 
 
+correlation = pd.read_csv(raw_csv / "correlation_all_indices_compute.csv")
+correlation_DT = pd.read_csv(raw_csv / "correlation_DT_final.csv")
+correlation_DT = correlation_DT.melt(id_vars=["SUBID","TCK","btw"],
+                        var_name="ind", value_name="corr")
+correlatoin = correlation.rename(columns={"subID":"SUBID"}, inplace=True)
+correlation = pd.concat( [correlation,correlation_DT])
+correlation["ind"] = correlation["ind"].str[:2]
 inds = ['ad', 'md', 'rd']
 correlation = correlation[correlation["TCK"].isin(tck_to_plot)]
 correlation = correlation[correlation["ind"].isin(inds)]
-correlation["TCK"] = correlation["TCK"].map(lambda x : x[0:4])
-
+correlation = correlation[~(correlation.btw=="T01vsT02")]
 fig = plt.figure(constrained_layout=True)
 ax = sns.stripplot(x="TCK", y = "corr", hue = "ind", dodge = True, 
-              data = correlation, order = order, rasterized=True)
+              data = correlation, order = tck_to_plot, rasterized=True)
 ax.set(ylabel="r"); ax.set(xlabel=False)
 ax.xaxis.grid(True)
 fig.set_size_inches(13,4.93)
-fig_dir = fr"F:\TESTDATA\GIT\THATRACT_paper\figures"
-fig.savefig(f"{fig_dir}\SM_Fig1_correlation_computation.svg", dpi=300,
+
+fig.savefig(fig_dir / "SM_Fig1_correlation_computation.svg", dpi=300,
             format = "svg", bbox_inches='tight')
 
 
 ### plot Fig.3 
-csv_dir = r"F:\TESTDATA\GIT\THATRACT_paper\csv"
-
-correlation = pd.read_csv(f"{csv_dir}\correlation_all_indices_test-retest.csv")
-tck_to_plot = ["L_OR_05", "R_OR_05", "L_AR_A1-4", "R_AR_A1-4", 
-               "L_MR_M1", "R_MR_M1", "L_DT-4", "R_DT-4"]
-
+correlation = pd.read_csv(raw_csv / "correlation_all_indices_test-retest.csv")
+correlatoin = correlation.rename(columns={"subID":"SUBID"}, inplace=True)
+correlation = pd.concat( [correlation,correlation_DT])
+correlation["ind"] = correlation["ind"].str[:2]
 correlation = correlation[correlation["TCK"].isin(tck_to_plot)]
 correlation = correlation[correlation["ind"].isin(inds)]
-correlation["TCK"] = correlation["TCK"].map(lambda x : x[0:4])
-                                                 
+correlation = correlation[correlation.btw=="T01vsT02"]                                                 
 
 fig = plt.figure(constrained_layout=True)
 ax = sns.stripplot(x="TCK", y = "corr", hue = "ind", dodge = 0.05, 
-              data = correlation, order = order, rasterized=True)
+              data = correlation, order = tck_to_plot, rasterized=True)
 ax.set(ylabel="r"); ax.set(xlabel=False)
 ax.xaxis.grid(True)
 fig.set_size_inches(13,4.93)
 
-fig_dir = fr"F:\TESTDATA\GIT\THATRACT_paper\figures"
-fig.savefig(f"{fig_dir}\SM_Fig2_correlation_test-retest.svg", dpi=300,
+fig.savefig(fig_dir / "SM_Fig2_correlation_test-retest.svg", dpi=300,
             format = "svg", bbox_inches='tight')
 

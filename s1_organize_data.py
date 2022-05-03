@@ -16,48 +16,60 @@ elif getpass.getuser() == "lmengxing":
         git_dir = Path("F:\TESTDATA\GIT\THATRACT_paper")
 raw_csv = Path(f"{git_dir}/raw_csv")
 
-# read tractparams to get the target label dictionary
-tractparams = pd.read_csv(raw_csv / "tractparams_THATRACT.csv")
-tract_dic = dict(zip(tractparams["slabel"], tractparams["roi2"]))
-tract_dic = {k:v for k, v in tract_dic.items() if "KN" in k}
+tractDic = {"LKN27":"L_OR_05", "LKN28":"R_OR_05", 
+            "LKN29":"L_OR_1", "LKN30":"R_OR_1",
+            "LKN31":"L_AR_belt-3", "LKN32":"L_AR_belt-4",
+            "LKN33":"L_AR_A1-3", "LKN34": "L_AR_A1-4",
+            "LKN35":"R_AR_belt-3", "LKN36":"R_AR_belt-4",
+            "LKN37":"R_AR_A1-3", "LKN38":"R_AR_A1-4",
+            "LKN39":"L_DT-3", "LKN40":"L_DT-4",
+            "LKN41":"R_DT-3", "LKN42"   :"R_DT-4",
+            "LKN43":"L_MR_M1", "LKN44":"R_MR_M1",
+            "LKN45":"L_MR_dlPreM", "LKN46":"R_MR_dlPreM", 
+            "LKN47":"L_SR", "LKN48":"R_SR",
+            "LKN65":"L_DT", "LKN67":"R_DT"     }
+
+
+
 ## load pairwise_TRT
 pairwise_TRT = pd.read_csv(raw_csv / "pairwise_agreement_THATRACT_TRT.csv")
+pairwise_DT_TRT = pd.read_csv(raw_csv / "pairwise_agreement_DT_TRT.csv")
 pairwise_TRT["btw"] = "T01vsT02"
+pairwise_DT_TRT["btw"] = "T01vsT02"
 # pairwise_TRT["analysis"] = "01"
 
 pairwise_compute = pd.read_csv(raw_csv / "pairwise_agreement_THATRACT.csv")
-pairwise_compute = pairwise_compute.drop(pairwise_compute[pairwise_compute["bundle_adjacency_voxels"].str.contains("bundle", na=True)].index)
-pairwise = pd.concat([pairwise_TRT, pairwise_compute])
+pairwise_compute = pairwise_compute[
+                ~(pairwise_compute["bundle_adjacency_voxels"].str.contains(
+                "bundle", na=True))]
+pairwise_DT_compute = pd.read_csv(raw_csv / "pairwise_agreement_DT_compute.csv",
+                        on_bad_lines='skip')
+pairwise_DT_compute = pairwise_DT_compute[
+                ~(pairwise_DT_compute["bundle_adjacency_voxels"].str.contains(
+                "bundle", na=True))]
+pairwise_DT_compute = pairwise_DT_compute[~(
+                        pairwise_DT_compute["SUBID"]=="08CAMINO4391")]
+pairwise = pd.concat([pairwise_TRT, pairwise_compute,
+                    pairwise_DT_TRT, pairwise_DT_compute ])
 
 pairwise = pairwise.rename(columns={"tract":"TCK"})
 pairwise["bundle_adjacency_voxels"] = pairwise["bundle_adjacency_voxels"].astype(float)
 pairwise["dice_voxels"] = pairwise["dice_voxels"].astype(float)
 pairwise["density_correlation"] = pairwise["density_correlation"].astype(float)
 pairwise = pairwise.replace({"TCK":tractDic})
-pairwise.to_csv(git_dir / "pairwise_all.csv", index=False)
+pairwise.to_csv(raw_csv / "pairwise_all.csv", index=False)
 
-pairwise = pd.read_csv(git_dir / "pairwise_all.csv")
+pairwise = pd.read_csv(raw_csv / "pairwise_all.csv")
 pairwise = pairwise[["bundle_adjacency_voxels", "dice_voxels", 
                 'density_correlation', 'TCK', 'SUBID', 'btw']]
 pairwise[pairwise["btw"]=="T01vsT02"].groupby(["TCK"]).describe(
-                ).to_csv("pairwise_agreement_TRT_description_new.csv")
+                ).to_csv(raw_csv / "pairwise_TRT_description_new.csv")
 pairwise[~(pairwise["btw"]=="T01vsT02")].groupby(["TCK"]).describe(
-                ).to_csv("pairwise_agreement_compute_description_new.csv")
+                ).to_csv(raw_csv / "pairwise_compute_description_new.csv")
 
 
 
 """ calculate results for compute vs recompute
-tractDic = {"LKN27":"L_OR_05", "LKN28":"R_OR_05", "LKN29":"L_OR_1", "LKN30":"R_OR_1",
-            "LKN31":"L_AR_belt-3", "LKN32":"L_AR_belt-4",
-            "LKN33":"L_AR_A1-3", "LKN34": "L_AR_A1-4",
-            "LKN35":"R_AR_belt-3", "LKN36":"R_AR_belt-4",
-            "LKN37":"R_AR_A1-3", "LKN38":"R_AR_A1-4",
-            "LKN39":"L_DT-3", "LKN40":"L_DT-4",
-            "LKN41":"R_DT-3", "LKN42":"R_DT-4",
-            "LKN43":"L_MR_M1", "LKN44":"R_MR_M1",
-            "LKN45":"L_MR_dlPreM", "LKN46":"R_MR_dlPreM", 
-            "LKN47":"L_MR_S1", "LKN48":"R_MR_S1"      }
-
 
 list1 = [f"{i:02d}" for i in range(1,11)]
 list1 = range(1,11)
@@ -186,17 +198,22 @@ pairwise.groupby("tract").describe().to_csv("pairwise_agreement_description.csv"
 
 correlation_TRT = pd.read_csv( raw_csv / "correlation_fa.csv")
 correlation_compute = pd.read_csv(raw_csv / "correlation_fa_compute.csv")
+correlation_DT = pd.read_csv( raw_csv / "correlation_DT_final.csv")
 correlation_compute["btw"]=correlation_compute["btw"]+"compute"
-correlation = pd.concat([correlation_TRT, correlation_compute])
+correlation_DT = correlation_DT.rename(columns={"fa_y":"corr",
+                                                "SUBID":"subID"})
+correlation = pd.concat([correlation_TRT, correlation_compute, correlation_DT],
+                            join='inner', ignore_index=True)
 correlation = correlation.rename(columns={"subID":"SUBID"})
-correlation = correlation.replace({"TCK":{"L_MT_S1":"L_MR_S1", "L_MT_M1":"L_MR_M1",
-                            "R_MT_S1":"R_MR_S1","R_MT_M1":"R_MR_M1"}})
+correlation = correlation.replace({"TCK":{"L_MT_S1":"L_SR", "L_MT_M1":"L_MR_M1",
+                            "R_MT_S1":"R_SR","R_MT_M1":"R_MR_M1"}})
+
 correlation.to_csv(raw_csv / "correlation_fa_TRT_compute.csv", index=False)
 
 correlation[correlation["btw"]=="T01vsT02"].groupby(["TCK"]).describe(
-                ).to_csv("correlation_TRT_description_new.csv")
+                ).to_csv(raw_csv / "correlation_TRT_description_new.csv")
 correlation[~(correlation["btw"]=="T01vsT02")].groupby(["TCK"]).describe(
-                ).to_csv("correlation_compute_description_new.csv")
+                ).to_csv(raw_csv / "correlation_compute_description_new.csv")
 
 
 profile = pd.read_csv( raw_csv / "RTP_Profile_compute.csv")
