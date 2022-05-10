@@ -26,16 +26,20 @@ tractDic = {"LKN27":"L_OR_05", "LKN28":"R_OR_05",
             "LKN41":"R_DT-3", "LKN42"   :"R_DT-4",
             "LKN43":"L_MR_M1", "LKN44":"R_MR_M1",
             "LKN45":"L_MR_dlPreM", "LKN46":"R_MR_dlPreM", 
-            "LKN47":"L_SR", "LKN48":"R_SR",
-            "LKN65":"L_DT", "LKN67":"R_DT"     }
+            "LKN47":"L_MR_S1", "LKN48":"R_MR_S1",
+            "LKN65":"L_DT", "LKN67":"R_DT",
+            "LKN75":"L_SR", "LKN76":"R_SR" }
 
 
 
 ## load pairwise_TRT
 pairwise_TRT = pd.read_csv(raw_csv / "pairwise_agreement_THATRACT_TRT.csv")
 pairwise_DT_TRT = pd.read_csv(raw_csv / "pairwise_agreement_DT_TRT.csv")
+pairwise_SR_TRT = pd.read_csv(raw_csv / "pairwise_agreement_SR_TRT.csv")
 pairwise_TRT["btw"] = "T01vsT02"
 pairwise_DT_TRT["btw"] = "T01vsT02"
+pairwise_SR_TRT["btw"] = "T01vsT02"
+
 # pairwise_TRT["analysis"] = "01"
 
 pairwise_compute = pd.read_csv(raw_csv / "pairwise_agreement_THATRACT.csv")
@@ -49,8 +53,10 @@ pairwise_DT_compute = pairwise_DT_compute[
                 "bundle", na=True))]
 pairwise_DT_compute = pairwise_DT_compute[~(
                         pairwise_DT_compute["SUBID"]=="08CAMINO4391")]
+pairwise_SR_compute = pd.read_csv(raw_csv / "pairwise_agreement_SR_compute.csv")
 pairwise = pd.concat([pairwise_TRT, pairwise_compute,
-                    pairwise_DT_TRT, pairwise_DT_compute ])
+                    pairwise_DT_TRT, pairwise_DT_compute,
+                    pairwise_SR_TRT, pairwise_SR_compute])
 
 pairwise = pairwise.rename(columns={"tract":"TCK"})
 pairwise["bundle_adjacency_voxels"] = pairwise["bundle_adjacency_voxels"].astype(float)
@@ -202,11 +208,16 @@ correlation_DT = pd.read_csv( raw_csv / "correlation_DT_final.csv")
 correlation_compute["btw"]=correlation_compute["btw"]+"compute"
 correlation_DT = correlation_DT.rename(columns={"fa_y":"corr",
                                                 "SUBID":"subID"})
-correlation = pd.concat([correlation_TRT, correlation_compute, correlation_DT],
+correlation_SR = pd.read_csv( raw_csv / "correlation_SR_final.csv")
+correlation_SR = correlation_SR.rename(columns={"fa_y":"corr","SUBID":"subID"})
+
+
+correlation = pd.concat([correlation_TRT, correlation_compute, 
+                        correlation_DT, correlation_SR],
                             join='inner', ignore_index=True)
 correlation = correlation.rename(columns={"subID":"SUBID"})
-correlation = correlation.replace({"TCK":{"L_MT_S1":"L_SR", "L_MT_M1":"L_MR_M1",
-                            "R_MT_S1":"R_SR","R_MT_M1":"R_MR_M1"}})
+correlation = correlation.replace({"TCK":{"L_MT_M1":"L_MR_M1",
+                            "R_MT_M1":"R_MR_M1"}})
 
 correlation.to_csv(raw_csv / "correlation_fa_TRT_compute.csv", index=False)
 

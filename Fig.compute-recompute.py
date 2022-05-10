@@ -29,8 +29,8 @@ profile = pd.read_csv( raw_csv / "RTP_Profile_compute_newlabel.csv")
 correlation = pd.read_csv( raw_csv / "correlation_fa_TRT_compute.csv")
 pairwise = pd.read_csv( raw_csv / "pairwise_all.csv")
 
-tck_to_plot = ["L_OR_05", "R_OR_05", "L_AR_A1-4", "R_AR_A1-4", 
-               "L_MR_M1", "R_MR_M1", "L_DT", "R_DT", "L_SR", "R_SR"]
+tck_to_plot = ["L_OR_05", "R_OR_05", "L_AR_A1-4", "R_AR_A1-4", "L_SR", "R_SR", 
+               "L_MR_M1", "R_MR_M1", "L_DT", "R_DT"]
 
 def plot_fig(btw, profile=profile, correlation=correlation, 
                 pairwise=pairwise, tck_to_plot=tck_to_plot):

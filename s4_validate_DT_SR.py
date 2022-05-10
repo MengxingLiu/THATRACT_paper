@@ -19,10 +19,7 @@ raw_csv = Path(f"{git_dir}/raw_csv")
 
 sns.set_theme()
 
-# read tractparams to get the target label dictionary
-tractparams = pd.read_csv(raw_csv / "tractparams_THATRACT_DT_2.csv")
-tract_dic = dict(zip(tractparams["slabel"], tractparams["roi2"]))
-tract_dic = {k:v for k, v in tract_dic.items() if "KN" in k}
+
 ## load pairwise_TRT
 pairwise_TRT = pd.read_csv(raw_csv / "pairwise_TRT_DT_2.csv")
 pairwise_TRT["btw"] = "T01vsT02"
@@ -135,3 +132,72 @@ con_fa_ana.to_csv(raw_csv / "correlation_DT_final.csv", index=False)
 
 con_fa_ana.groupby("TCK").describe().to_csv(raw_csv / 
                 "correlation_description_TRT_DT_2.csv")
+
+## load pairwise_TRT
+pairwise_TRT = pd.read_csv(raw_csv / "pairwise_agreement_SR_TRT.csv")
+pairwise_TRT["btw"] = "T01vsT02"
+pairwise_TRT = pairwise_TRT.rename(columns={"tract":"TCK"})
+# pairwise_TRT["analysis"] = "01"
+
+plt_DT(pairwise_TRT, "density_correlation")
+plt_DT(pairwise_TRT, "dice_voxels")
+plt_DT(pairwise_TRT, "bundle_adjacency_voxels")
+
+
+
+
+df = pd.read_csv(raw_csv / "RTP_Profile_SR_final.csv", dtype={"analysis":str})
+analysis = df.analysis.unique()
+analysis = itertools.combinations(analysis,2)
+
+## calculate RTP profile correlation
+
+between = ["computation", "test-retest"]
+
+inds = ['ad', 'cl', 'md', 'volume', 'curvature',
+       'rd', 'fa', 'torsion']
+con_fa_ana = pd.DataFrame()
+
+for ana in analysis:
+    for BTW in between:
+        print(ana, " start")
+        if BTW=="computation":
+            
+            df_ana_x = df[ (df["ses"] == "T01") & (df["analysis"] == ana[0])]
+            df_ana_y = df[ (df["ses"] == "T01") & (df["analysis"] == ana[1])]
+            btw = f"{ana[0]}vs{ana[1]}"
+            df_ana = df_ana_x.merge(df_ana_y, how="inner",
+                    on=["subID", "ind", "TCK", "ses"])
+        elif ((BTW=="test-retest" ) & (ana == ("51", "52"))):
+
+            df_ana_x = df[ (df["ses"] == "T01") & (df["analysis"] == ana[0])]
+            df_ana_y = df[ (df["ses"] == "T02") & (df["analysis"] == ana[0])] 
+            df_ana = df_ana_x.merge(df_ana_y, how="inner",
+                    on=["subID", "ind", "TCK", "analysis"])
+            btw = "T01vsT02"
+        else: 
+            continue       
+        tmp_df = pd.DataFrame()
+        for i in inds:
+            c = df_ana.groupby(["subID", "TCK"])[i+"_x", i+"_y"].corr().iloc[0::2,-1]
+            c = c.reset_index()[["subID", "TCK", i+"_y"]]
+            if i == inds[0]:
+                tmp_df = c.copy()
+            else: tmp_df[i+"_y"] = c[i+"_y"]
+        tmp_df["btw"] = btw
+        print(ana, " finish")
+        con_fa_ana = con_fa_ana.append(tmp_df, ignore_index=True)
+
+con_fa_ana_bk = con_fa_ana.copy()
+con_fa_ana_bk.to_csv(raw_csv / "con_fa_ana_SR_raw.csv", index=False)
+con_fa_ana = pd.read_csv(raw_csv / "con_fa_ana_SR_raw.csv")
+con_filter = con_fa_ana[con_fa_ana["fa_y"]<0.7]
+
+plt_DT(con_fa_ana, "fa_y")
+con_fa_ana = con_fa_ana.replace({"TCK":{"KN75":"L_SR", "KN76":"R_SR"}} )
+
+con_fa_ana = con_fa_ana.rename(columns={"subID":"SUBID"})
+con_fa_ana.to_csv(raw_csv / "correlation_SR_final.csv", index=False)
+
+
+

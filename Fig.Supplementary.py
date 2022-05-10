@@ -164,17 +164,20 @@ pairwise.groupby("tract").describe().to_csv("pairwise_agreement_description.csv"
 """
 
 tck_to_plot = ["L_OR_05", "R_OR_05", "L_AR_A1-4", "R_AR_A1-4", 
-               "L_MR_M1", "R_MR_M1", "L_DT", "R_DT", 
-                "L_MR_S1", "R_MR_S1"]
+               "L_SR", "R_SR", "L_MR_M1", "R_MR_M1", "L_DT", "R_DT"]
 
  # plot Fig. 2 
 
 correlation = pd.read_csv(raw_csv / "correlation_all_indices_compute.csv")
 correlation_DT = pd.read_csv(raw_csv / "correlation_DT_final.csv")
+correlation_SR = pd.read_csv(raw_csv / "correlation_SR_final.csv")
 correlation_DT = correlation_DT.melt(id_vars=["SUBID","TCK","btw"],
                         var_name="ind", value_name="corr")
+correlation_SR = correlation_SR.melt(id_vars=["SUBID","TCK","btw"],
+                        var_name="ind", value_name="corr")
+
 correlatoin = correlation.rename(columns={"subID":"SUBID"}, inplace=True)
-correlation = pd.concat( [correlation,correlation_DT])
+correlation = pd.concat( [correlation,correlation_DT, correlation_SR])
 correlation["ind"] = correlation["ind"].str[:2]
 inds = ['ad', 'md', 'rd']
 correlation = correlation[correlation["TCK"].isin(tck_to_plot)]
@@ -194,7 +197,7 @@ fig.savefig(fig_dir / "SM_Fig1_correlation_computation.svg", dpi=300,
 ### plot Fig.3 
 correlation = pd.read_csv(raw_csv / "correlation_all_indices_test-retest.csv")
 correlatoin = correlation.rename(columns={"subID":"SUBID"}, inplace=True)
-correlation = pd.concat( [correlation,correlation_DT])
+correlation = pd.concat( [correlation,correlation_DT, correlation_SR])
 correlation["ind"] = correlation["ind"].str[:2]
 correlation = correlation[correlation["TCK"].isin(tck_to_plot)]
 correlation = correlation[correlation["ind"].isin(inds)]
