@@ -3,9 +3,9 @@ Left-LGN,.nii.gz,Left-V1_AND_Left-V2,.nii.gz,OR_roi3_L,.nii.gz,NO,.nii.gz,NO,.ni
 Right-LGN,.nii.gz,Right-V1_AND_Right-V2,.nii.gz,OR_roi3_R,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,1,1,0,0,0,0,1,KN28,28,L,LKN28,L,KN,0,0,200,20,45,iFoD2,5000,0.05,4,4,100,median,3
 Left-MGN,.nii.gz,L_Primary_Auditory_Cortex,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,1,1,0,0,0,0,0,KN34,34,L,LKN34,L,KN,0,0,200,20,45,iFoD2,5000,0.05,4,4,100,median,3
 Right-MGN,.nii.gz,R_Primary_Auditory_Cortex,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,1,1,0,0,0,0,0,KN38,38,L,LKN38,L,KN,0,0,200,20,45,iFoD2,5000,0.05,4,4,100,median,3
-Left-VLp,.nii.gz,Right-Dentate,.nii.gz,NO,.nii.gz,NO,.nii.gz,Right-Brain-Stem,.nii.gz,NO,.nii.gz,1,2,0,0,0,0,0,KN40,40,L,LKN40,L,KN,0,0,200,20,60,iFoD2,5000,0.05,4,4,100,median,3
-Right-VLp,.nii.gz,Left-Dentate,.nii.gz,NO,.nii.gz,NO,.nii.gz,Left-Brain-Stem,.nii.gz,NO,.nii.gz,1,2,0,0,0,0,0,KN42,42,L,LKN42,L,KN,0,0,200,20,60,iFoD2,5000,0.05,4,4,100,median,3
+Left-VPL,.nii.gz,L_S1,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,1,1,0,0,0,0,0,KN75,75,L,LKN75,L,KN,0,0,200,20,45,iFoD2,5000,0.05,5,5,100,median,3
+Right-VPL,.nii.gz,R_S1,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,1,1,0,0,0,0,0,KN76,76,L,LKN76,L,KN,0,0,200,20,45,iFoD2,5000,0.05,5,5,100,median,3
 Left-VLa_AND_Left-VLp,.nii.gz,L_Primary_Motor_Cortex,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,1,1,0,0,0,0,0,KN43,43,L,LKN43,L,KN,0,0,200,20,45,iFoD2,5000,0.05,4,4,100,median,3
 Right-VLa_AND_Right-VLp,.nii.gz,R_Primary_Motor_Cortex,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,1,1,0,0,0,0,0,KN44,44,L,LKN44,L,KN,0,0,200,20,45,iFoD2,5000,0.05,4,4,100,median,3
-Left-VLa_AND_Left-VLp,.nii.gz,L_S1,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,1,1,0,0,0,0,0,KN47,47,L,LKN47,L,KN,0,0,200,20,45,iFoD2,5000,0.05,4,4,100,median,3
-Right-VLa_AND_Right-VLp,.nii.gz,R_S1,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,NO,.nii.gz,1,1,0,0,0,0,0,KN48,48,L,LKN48,L,KN,0,0,200,20,45,iFoD2,5000,0.05,4,4,100,median,3
+Left-VLp,.nii.gz,Right-Dentate,.nii.gz,NO,.nii.gz,NO,.nii.gz,Right-Thalamus,.nii.gz,Left-Cerebellum-Cortex,.nii.gz,1,1,0,0,0,0,0,KN65,65,L,LKN65,L,KN,0,0,200,20,45,iFoD2,5000,0.05,3,3,100,median,3
+Right-VLp,.nii.gz,Left-Dentate,.nii.gz,NO,.nii.gz,NO,.nii.gz,Left-Thalamus,.nii.gz,Right-Cerebellum-Cortex,.nii.gz,1,1,0,0,0,0,0,KN67,67,L,LKN67,L,KN,0,0,200,20,45,iFoD2,5000,0.05,3,3,100,median,3
