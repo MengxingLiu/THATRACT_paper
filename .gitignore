@@ -1,7 +1,8 @@
+.gitignore
 raw_csv/
 fig_dir/
 .~*
 *doc
 *docx
 figures/
-
+tractparams_thatract_paper.csv
