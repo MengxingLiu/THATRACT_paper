@@ -14,6 +14,7 @@ import matplotlib.gridspec as gridspec
 from pathlib import Path
 import matplotlib.ticker as ticker
 
+plt.rcParams['svg.fonttype'] = 'none'
 if getpass.getuser() == "mengxing":
     git_dir = Path("/home/mengxing/GIT/THATRACT_paper")
 elif getpass.getuser() == "lmengxing":
