@@ -37,67 +37,6 @@ for x in groups.columns:
     tcks = tcks + list(groups[x][groups[x].notna()])
 b = a[a["TCK"].isin(tcks[:-2])]
 factors = ["noise_T01", "tck_mean_T01", "tck_count_T01"]
-for i in factors:
-    y = i
-    plt.close()
-    sns.set_style("darkgrid")
-    fig, ax = plt.subplots(2,2)
-    ax = ax.flatten()
-    x="test-retest_AL_07_fa_Fisher_Z"
-    sns.regplot(x=x,y=y, data=b, ax = ax[0], label = b[x].corr(b[y]))
-    x="AL_all_fa_Fisher_Z"; 
-    sns.regplot(x=x,y=y, data=b, ax = ax[0], label = b[x].corr(b[y]))
-    ax[0].set(title=f"FA correlation Fisher_Z vs {y}")
-    x="dice_voxels_T01vsT02_ln"
-    sns.regplot(x=x,y=y, data=b, ax = ax[1], label = b[x].corr(b[y]))
-    x="dice_voxels_comAL_all_average_ln"
-    sns.regplot(x=x,y=y, data=b, ax = ax[1], label = b[x].corr(b[y]))
-    ax[1].set(title=f"ln Dice index vs {y}")
-    x="density_correlation_T01vsT02_Fisher_z"
-    sns.regplot(x=x,y=y, data=b, ax = ax[2], label = b[x].corr(b[y]))
-    x="density_correlation_comAL_all_average_Fisher_z"
-    sns.regplot(x=x,y=y, data=b, ax = ax[2], label = b[x].corr(b[y]))
-    ax[2].set(title=f" density correlation Fisher_z vs {y}")
-    x="bundle_adjacency_voxels_T01vsT02"
-    sns.regplot(x=x,y=y, data=b, ax = ax[3], label = b[x].corr(b[y]))
-    x="bundle_adjacency_voxels_comAL_all_average"
-    sns.regplot(x=x,y=y, data=b, ax = ax[3], label = b[x].corr(b[y]))
-    ax[3].set(title=f"bundle adjacency vs {y}")
-    for a in ax:
-        a.legend()
-    # plt.legend()
-    plt.show()
-
-
-corr_pairs = {"tck_mean_T01": "noise_T01", "tck_count_T01": "noise_T01",
-             "test-retest_AL_07_fa_Fisher_Z": "noise_T01",
-             "test-retest_AL_07_fa_Fisher_Z": "noise_T02",
-             "test-retest_AL_07_fa_Fisher_Z": "tck_mean_T01",
-             "test-retest_AL_07_fa_Fisher_Z": "tck_count_T01",
-             "dice_voxels_T01vsT02_ln": "noise_T01",
-             "dice_voxels_T01vsT02_ln": "tck_mean_T01",
-             "dice_voxels_T01vsT02_ln": "tck_count_T01",
-             "density_correlation_T01vsT02_Fisher_z": "noise_T01",
-             "density_correlation_T01vsT02_Fisher_z": "tck_mean_T01",
-             "density_correlation_T01vsT02_Fisher_z": "tck_count_T01",
-             "bundle_adjacency_voxels_T01vsT02": "noise_T01",
-             "bundle_adjacency_voxels_T01vsT02": "tck_mean_T01",
-             "bundle_adjacency_voxels_T01vsT02": "tck_count_T01",
-             "AL_all_fa_Fisher_Z": "noise_T01",
-             "AL_all_fa_Fisher_Z": "tck_mean_T01",
-             "AL_all_fa_Fisher_Z": "tck_count_T01",
-             "dice_voxels_comAL_all_average_ln": "noise_T01",
-             "dice_voxels_comAL_all_average_ln": "tck_mean_T01",
-             "dice_voxels_comAL_all_average_ln": "tck_count_T01",
-             "density_correlation_comAL_all_average_Fisher_z": "noise_T01",
-             "density_correlation_comAL_all_average_Fisher_z": "tck_mean_T01",
-             "density_correlation_comAL_all_average_Fisher_z": "tck_count_T01",                           
-             "bundle_adjacency_voxels_comAL_all_average": "noise_T01",
-             "bundle_adjacency_voxels_comAL_all_average": "tck_mean_T01",
-             "bundle_adjacency_voxels_comAL_all_average": "tck_count_T01"
-               }
-
-
 repro = ["test-retest_AL_07_fa_Fisher_Z", "dice_voxels_T01vsT02_ln", 
         "density_correlation_T01vsT02_Fisher_z", "bundle_adjacency_voxels_T01vsT02"]
 corr_heat = pd.DataFrame()
@@ -191,4 +130,22 @@ plt.gca().set_visible(False)
 cax = plt.axes([0.1, 0.2, 0.8, 0.6])
 plt.colorbar(orientation="horizontal", cax=cax)
 plt.show()
+
+
+classic = ['CFMaj', 'CFMin', 'LAF', 'LCC', 'LCH', 'LCST', 'LIFOF', 'LILF',
+            'LORV1V2', 'LORV1V2R3', 'LSLF', 'LTR', 'LUF', 'RAF', 'RCC', 
+            'RCH', 'RCST', 'RIFO', 'RILF', 'RORV1', 'RORV1V2',
+            'RORV1V2R3', 'RSLF', 'RTR', 'RUF']
+corr_subwise=pd.DataFrame()
+data = data[(~data.noise_T02.isna()) & (~data.noise_T01.isna()) ]
+for key, value in itertools.product(repro, factors):
+    r = []
+    for i in data.SUBID.unique():
+        x = data[(data.SUBID==i) & (data.TCK.isin(classic))][key]
+        y = data[(data.SUBID==i) & (data.TCK.isin(classic))][value]
+        if len(x)<20:continue
+        r_tmp,p = scipy.stats.pearsonr(x,y)
+        r.append(r_tmp)
+    corr_subwise = corr_subwise.append({"repro":key, value:np.mean(r)}, ignore_index=True)
+corr_subwise = corr_subwise.groupby("repro").max()
 
